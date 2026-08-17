@@ -25,6 +25,11 @@ export const CATEGORIES: { slug: CategorySlug; label: string }[] = [
   { slug: "conjuntos", label: "Conjuntos" },
 ];
 
+export function categoryLabel(slug?: string) {
+  if (!slug) return "Roupas";
+  return CATEGORIES.find((c) => c.slug === slug)?.label ?? "Roupas";
+}
+
 export const NAV_LINKS = [
   { label: "Novidades", href: "/novidades" },
   {
