@@ -6,6 +6,10 @@ import type { NextAuthConfig } from "next-auth";
  * only runs in the Node.js runtime (API routes / server components).
  */
 export const authConfig: NextAuthConfig = {
+  // Self-hosted (non-Vercel) deployments must explicitly trust the request
+  // Host header, or NextAuth v5 rejects every request in production with
+  // "There was a problem with the server configuration."
+  trustHost: true,
   pages: {
     signIn: "/entrar",
   },
