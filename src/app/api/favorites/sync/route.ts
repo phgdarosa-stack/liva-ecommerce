@@ -11,10 +11,20 @@ export async function POST(req: NextRequest) {
   const productIds: string[] = Array.isArray(body?.productIds) ? body.productIds : [];
   if (productIds.length === 0) return NextResponse.json({ ok: true });
 
-  await prisma.favorite.createMany({
-    data: productIds.map((productId) => ({ userId: user!.id, productId })),
-    skipDuplicates: true,
+  // SQLite has no ON CONFLICT DO NOTHING support in Prisma's createMany, so
+  // duplicates are filtered client-side instead of relying on skipDuplicates.
+  const existing = await prisma.favorite.findMany({
+    where: { userId: user!.id, productId: { in: productIds } },
+    select: { productId: true },
   });
+  const existingIds = new Set(existing.map((f) => f.productId));
+  const newIds = productIds.filter((id) => !existingIds.has(id));
+
+  if (newIds.length > 0) {
+    await prisma.favorite.createMany({
+      data: newIds.map((productId) => ({ userId: user!.id, productId })),
+    });
+  }
 
   const favorites = await prisma.favorite.findMany({
     where: { userId: user!.id },

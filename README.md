@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LIVA — New Season 01
 
-## Getting Started
+E-commerce completo para a LIVA, marca brasileira de moda feminina contemporânea. Loja com
+catálogo, carrinho, checkout, contas de cliente e um painel administrativo protegido, construída
+como projeto de portfólio full-stack.
 
-First, run the development server:
+**Vista o seu agora.**
+
+## Stack
+
+- **Next.js 16** (App Router, Turbopack) + **TypeScript**
+- **Tailwind CSS v4** — tema da marca definido em `src/app/globals.css`
+- **Prisma + SQLite** — banco de dados local (`prisma/schema.prisma`)
+- **NextAuth v5 (Credentials)** — autenticação por e-mail/senha com papéis `CUSTOMER` / `ADMIN`
+- **Zustand** — carrinho e favoritos (persistidos no `localStorage` para visitantes)
+- **Radix UI** — dialogs, accordion, tabs (acessíveis por padrão)
+
+## Como rodar localmente
 
 ```bash
+npm install
+cp .env.example .env      # ajuste AUTH_SECRET se preferir
+npm run db:push           # cria o banco SQLite a partir do schema
+npm run db:seed           # popular com os 20 produtos, cupons e usuários demo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Contas de demonstração
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Papel     | E-mail               | Senha             |
+| --------- | --------------------- | ----------------- |
+| Cliente   | cliente@liva.com.br   | Liva@Cliente123    |
+| Admin     | admin@liva.com.br     | Liva@Admin123       |
 
-## Learn More
+O painel administrativo fica em `/admin` e é protegido em nível de servidor (middleware +
+verificação de papel em cada rota de API) — não depende de esconder links no frontend.
 
-To learn more about Next.js, take a look at the following resources:
+### Cupons ativos
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`BEMVINDALIVA` (15% na primeira compra) · `LIVA10` (10%) · `PRIMEIRACOMPRA` (10% na primeira
+compra) · `FRETEGRATIS` (frete grátis)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+| Comando               | Descrição                                            |
+| ---------------------- | ----------------------------------------------------- |
+| `npm run dev`           | Servidor de desenvolvimento                           |
+| `npm run build`         | Build de produção                                     |
+| `npm run db:push`       | Sincroniza o schema Prisma com o banco SQLite          |
+| `npm run db:seed`       | Popula o banco com produtos, cupons e usuários demo   |
+| `npm run db:reset`      | Reseta o banco do zero e roda o seed novamente         |
+| `npm run lint`          | ESLint                                                 |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estrutura do projeto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+prisma/                  schema.prisma + seed.ts
+src/
+  app/                    rotas (App Router) — loja, conta, checkout, admin, APIs
+  components/
+    layout/               header, footer, promo strip, busca, chrome condicional (loja x admin)
+    home/                 seções da home
+    product/              card, galeria, seletor de variação, avaliações
+    cart/                 drawer, item, cupom, barra de frete grátis
+    catalog/              filtros, ordenação, bottom sheet mobile
+    checkout/              stepper e as 3 etapas (entrega, pagamento, revisão)
+    account/               sidebar, endereços, pedidos, rastreio
+    admin/                 sidebar, formulário de produto, gestão de pedidos/cupons/estoque
+    ui/                    primitivos (Button, Badge, Price, Rating, EmptyState...)
+  lib/                    Prisma client, auth (NextAuth), regras de negócio (frete, cupons,
+                          cálculo de carrinho), validação (zod)
+  store/                  Zustand — carrinho e favoritos
+  data/                   dados brutos dos 20 produtos (usados no seed)
+  types/                  tipos compartilhados
+public/images/campaign/  fotografia de campanha gerada para a coleção NEW SEASON 01
+```
+
+## Decisões de escopo (projeto de demonstração)
+
+- **Pagamento**: simulado. Nenhum dado de cartão é processado ou armazenado; nenhum gateway real é
+  chamado.
+- **Frete**: calculado com uma fórmula determinística baseada no CEP (sem integração com Correios).
+- **Imagens de produto**: reaproveitam a fotografia de campanha por categoria (gerada por IA) —
+  cada produto tem uma foto de modelo e uma foto de detalhe/still life, mantendo a identidade
+  visual da marca consistente.
+- **Preços e estoque no checkout** são sempre recalculados a partir do banco de dados no servidor,
+  nunca confiando no valor enviado pelo cliente.

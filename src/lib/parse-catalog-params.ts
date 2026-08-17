@@ -1,4 +1,9 @@
+import type { CatalogFilters } from "./products";
+
 export type SearchParamsInput = Record<string, string | string[] | undefined>;
+
+type SortValue = NonNullable<CatalogFilters["sort"]>;
+const VALID_SORTS: SortValue[] = ["relevancia", "novidade", "preco-asc", "preco-desc", "mais-vendido"];
 
 export function parseCatalogParams(searchParams: SearchParamsInput, category?: string) {
   const get = (key: string) => {
@@ -13,23 +18,26 @@ export function parseCatalogParams(searchParams: SearchParamsInput, category?: s
   const promo = get("promo") === "1";
   const bestseller = get("bestseller") === "1";
   const newArrival = get("novidade") === "1";
-  const sort = (get("ordenar") as "novidade" | "preco-asc" | "preco-desc" | "mais-vendido" | undefined) ?? "relevancia";
+  const rawSort = get("ordenar");
+  const sort: SortValue = VALID_SORTS.includes(rawSort as SortValue) ? (rawSort as SortValue) : "relevancia";
   const q = get("q");
+
+  const catalogFilters: CatalogFilters = {
+    category,
+    sizes,
+    colors,
+    minPrice,
+    maxPrice,
+    promo,
+    bestseller,
+    newArrival,
+    sort,
+    q,
+  };
 
   return {
     filterValues: { category, sizes, colors, minPrice, maxPrice, promo, bestseller, newArrival },
-    catalogFilters: {
-      category,
-      sizes,
-      colors,
-      minPrice,
-      maxPrice,
-      promo,
-      bestseller,
-      newArrival,
-      sort,
-      q,
-    },
+    catalogFilters,
     sort,
   };
 }
