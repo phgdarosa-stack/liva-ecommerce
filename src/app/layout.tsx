@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/layout/Providers";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import PromoStrip from "@/components/layout/PromoStrip";
-import CartDrawer from "@/components/cart/CartDrawer";
+import SiteChrome from "@/components/layout/SiteChrome";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -46,13 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             Pular para o conteúdo
           </a>
-          <PromoStrip />
-          <Header />
-          <main id="conteudo-principal" className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <CartDrawer />
+          <SiteChrome>{children}</SiteChrome>
         </Providers>
       </body>
     </html>
