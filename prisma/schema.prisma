@@ -167,6 +167,12 @@ model Order {
   updatedAt           DateTime @updatedAt
 }
 
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
 model OrderItem {
   id          String         @id @default(cuid())
   orderId     String
